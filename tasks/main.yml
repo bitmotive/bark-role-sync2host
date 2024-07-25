@@ -1,0 +1,117 @@
+---
+# ROLE: SYNC2HOST
+#
+# DESCRIPTION:
+# This role is used to rsync files or folders from a remote host to a local host 
+
+
+###############################################################################
+################### VARIABLE INITIALIZATION & TASK SETUP ######################
+###############################################################################
+
+
+# SYNC2HOST_TARGET_FILEPATH
+# What file or folder should be copied to the local host
+- name: SYNC2HOST_TARGET_FILEPATH set fact from env if possible
+  set_fact:
+    SYNC2HOST_TARGET_FILEPATH: "{{ lookup('env', 'SYNC2HOST_TARGET_FILEPATH') | default('') | trim }}"
+  when: lookup('env', 'SYNC2HOST_TARGET_FILEPATH') | default('', true) | trim != ''
+- name: SYNC2HOST_TARGET_FILEPATH prompt user input if unset
+  pause:
+    prompt: "SET SYNC2HOST_TARGET_FILEPATH"
+    echo: yes
+  register: input
+  when: SYNC2HOST_TARGET_FILEPATH is not defined
+- name: Set SYNC2HOST_TARGET_FILEPATH fact from user input
+  set_fact:
+    SYNC2HOST_TARGET_FILEPATH: "{{ input.user_input | default('') | trim }}"
+  when: SYNC2HOST_TARGET_FILEPATH is not defined
+
+# SYNC2HOST_HOST_FILEPATH
+# Where to place the file or folder on the local host
+- name: SYNC2HOST_HOST_FILEPATH set fact from env if possible
+  set_fact:
+    SYNC2HOST_HOST_FILEPATH: "{{ lookup('env', 'SYNC2HOST_HOST_FILEPATH') | default('') | trim }}"
+  when: lookup('env', 'SYNC2HOST_HOST_FILEPATH') | default('', true) | trim != ''
+- name: SYNC2HOST_HOST_FILEPATH prompt user input if unset
+  pause:
+    prompt: "SET SYNC2HOST_HOST_FILEPATH"
+    echo: yes
+  register: input
+  when: SYNC2HOST_HOST_FILEPATH is not defined
+- name: Set SYNC2HOST_HOST_FILEPATH fact from user input
+  set_fact:
+    SYNC2HOST_HOST_FILEPATH: "{{ input.user_input | default('') | trim }}"
+  when: SYNC2HOST_HOST_FILEPATH is not defined
+
+# SYNC2HOST_HOST_FILEPATH_GROUP
+# The group that the file(s) or folder should have
+- name: SYNC2HOST_HOST_FILEPATH_GROUP set fact from env if possible
+  set_fact:
+    SYNC2HOST_HOST_FILEPATH_GROUP: "{{ lookup('env', 'SYNC2HOST_HOST_FILEPATH_GROUP') | default('') | trim }}"
+  when: lookup('env', 'SYNC2HOST_HOST_FILEPATH_GROUP') | default('', true) | trim != ''
+- name: SYNC2HOST_HOST_FILEPATH_GROUP prompt user input if unset
+  pause:
+    prompt: "SET SYNC2HOST_HOST_FILEPATH_GROUP"
+    echo: yes
+  register: input
+  when: SYNC2HOST_HOST_FILEPATH_GROUP is not defined
+- name: Set SYNC2HOST_HOST_FILEPATH_GROUP fact from user input
+  set_fact:
+    SYNC2HOST_HOST_FILEPATH_GROUP: "{{ input.user_input | default('') | trim }}"
+  when: SYNC2HOST_HOST_FILEPATH_GROUP is not defined
+
+# SYNC2HOST_HOST_FILEPATH_USER
+# The user that the file(s) or folder should have
+- name: SYNC2HOST_HOST_FILEPATH_USER set fact from env if possible
+  set_fact:
+    SYNC2HOST_HOST_FILEPATH_USER: "{{ lookup('env', 'SYNC2HOST_HOST_FILEPATH_USER') | default('') | trim }}"
+  when: lookup('env', 'SYNC2HOST_HOST_FILEPATH_USER') | default('', true) | trim != ''
+- name: SYNC2HOST_HOST_FILEPATH_USER prompt user input if unset
+  pause:
+    prompt: "SET SYNC2HOST_HOST_FILEPATH_USER"
+    echo: yes
+  register: input
+  when: SYNC2HOST_HOST_FILEPATH_USER is not defined
+- name: Set SYNC2HOST_HOST_FILEPATH_USER fact from user input
+  set_fact:
+    SYNC2HOST_HOST_FILEPATH_USER: "{{ input.user_input | default('') | trim }}"
+  when: SYNC2HOST_HOST_FILEPATH_USER is not defined
+
+# SYNC2HOST_HOST_FILEPATH_PERMS
+# The permissions that the files should have on the host
+- name: SYNC2HOST_HOST_FILEPATH_PERMS set fact from env if possible
+  set_fact:
+    SYNC2HOST_HOST_FILEPATH_PERMS: "{{ lookup('env', 'SYNC2HOST_HOST_FILEPATH_PERMS') | default('') | trim }}"
+  when: lookup('env', 'SYNC2HOST_HOST_FILEPATH_PERMS') | default('', true) | trim != ''
+- name: SYNC2HOST_HOST_FILEPATH_PERMS prompt user input if unset
+  pause:
+    prompt: "SET SYNC2HOST_HOST_FILEPATH_PERMS"
+    echo: yes
+  register: input
+  when: SYNC2HOST_HOST_FILEPATH_PERMS is not defined
+- name: Set SYNC2HOST_HOST_FILEPATH_PERMS fact from user input
+  set_fact:
+    SYNC2HOST_HOST_FILEPATH_PERMS: "{{ input.user_input | default('') | trim }}"
+  when: SYNC2HOST_HOST_FILEPATH_PERMS is not defined
+
+
+###############################################################################
+############################ ROLE IMPLEMENTATION ##############################
+###############################################################################
+
+
+- name: Sync files from target to host
+  synchronize:
+    src: "{{ SYNC2HOST_TARGET_FILEPATH }}"
+    dest: "{{ SYNC2HOST_HOST_FILEPATH }}"
+    mode: pull
+
+- name: Set file ownership and permissions
+  file:
+    path: "{{ SYNC2HOST_HOST_FILEPATH }}"
+    owner: "{{ SYNC2HOST_HOST_FILEPATH_USER }}"
+    group: "{{ SYNC2HOST_HOST_FILEPATH_GROUP }}"
+    mode: '{{ SYNC2HOST_HOST_FILEPATH_PERMS }}'
+    recurse: yes
+  delegate_to: localhost
